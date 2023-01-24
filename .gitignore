@@ -1,0 +1,6 @@
+**/.vs/
+**/bin/**
+**/obj/**
+**/.vscode/**
+# session和url都在里边
+KeySettings.json

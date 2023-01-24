@@ -1,0 +1,10 @@
+{
+  "Bot": {
+    "CommandPrefix": "!"
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "None"
+    }
+  }
+}

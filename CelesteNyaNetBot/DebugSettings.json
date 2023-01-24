@@ -1,0 +1,12 @@
+{
+  "TokenService": {
+    "Session": null,
+    "BaseUrl": null
+  },
+  "Connection": {
+    "WebSocketUri": "ws://127.0.0.1:5000"
+  },
+  "Logging": {
+    "LogFileName": "D:\\文档\\temp\\test.log"
+  }
+}
