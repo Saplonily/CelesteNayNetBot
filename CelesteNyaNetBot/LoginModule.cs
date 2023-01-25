@@ -1,6 +1,8 @@
 ﻿using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using CelesteNyaNetBot.Response;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using SaladimQBot.Core;
 using SaladimQBot.Extensions;
 using SaladimQBot.GoCqHttp;
@@ -16,12 +18,19 @@ public class LoginModule : CommandModule
     protected Regex nameRegex = new(@"^[_a-zA-Z\^\.0-9]+$", RegexOptions.Compiled);
     protected MemorySessionService memorySessionService;
     protected CoroutineService coroutineService;
+    protected IServiceProvider serviceProvider;
 
-    public LoginModule(ITokenService tokenService, MemorySessionService memorySessionService, CoroutineService coroutineService)
+    public LoginModule(
+        ITokenService tokenService,
+        MemorySessionService memorySessionService,
+        CoroutineService coroutineService,
+        IServiceProvider serviceProvider
+        )
     {
         this.tokenService = tokenService;
         this.memorySessionService = memorySessionService;
         this.coroutineService = coroutineService;
+        this.serviceProvider = serviceProvider;
     }
 
     [Command("bind")]
@@ -58,6 +67,18 @@ public class LoginModule : CommandModule
                 yield break;
             }
             string userName = string.Join(' ', userNameStrs);
+            if (userNameStrs.Length == 0)
+            {
+                yield break;
+            }
+            if (userNameStrs.Length == 2)
+            {
+                if (userNameStrs[1] == "confirm")
+                {
+                    Content.Message.Sender.SendMessageAsync(groupIdWay, "请先使用 \"!bind 用户名\"指令后再使用该指令进行确认.");
+                }
+                yield break;
+            }
             if (!nameRegex.IsMatch(userName))
             {
                 Content.Message.Sender.SendMessageAsync(groupIdWay, "昵称不符合规则！只允许大小写字母和数字以及符号_和^和.的组合.");
@@ -78,7 +99,8 @@ public class LoginModule : CommandModule
                 "bind",
                 new object[] { new string[] { userName, "confirm" } }
                 );
-            var tickWaiter = new TickWaiter(20);
+            int time = int.Parse(serviceProvider.GetRequiredService<IConfiguration>()["Bot:BindTimeout"]!);
+            var tickWaiter = new TickWaiter(time);
             EventWaiter resultWaiter = null!;
             yield return new OrEventWaiter(cmdWaiter, tickWaiter, w => resultWaiter = w);
             if (ReferenceEquals(resultWaiter, tickWaiter))

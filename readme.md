@@ -7,7 +7,7 @@
 ```json
 {
   "TokenService": {
-    "Session": "session",
+    "Session": "session号",
     "BaseUrl": "http://后端的.地址"
   },
   "Connection": {

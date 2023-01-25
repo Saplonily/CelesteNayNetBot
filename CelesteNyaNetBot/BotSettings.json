@@ -1,6 +1,7 @@
 {
   "Bot": {
-    "CommandPrefix": "!"
+    "CommandPrefix": "!",
+    "BindTimeout": 40
   },
   "Logging": {
     "LogLevel": {
