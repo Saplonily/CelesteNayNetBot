@@ -6,7 +6,7 @@ namespace CelesteNyaNetBot.Api;
 public class DeleteAccountApi : NayApi
 {
     [JsonIgnore]
-    public override Uri Uri => new("bot/deleteAccount");
+    public override Uri Uri => new("bot/deleteAccount", UriKind.Relative);
 
     [JsonIgnore]
     public override Type ResponseType => typeof(EmptyNayResponseData);

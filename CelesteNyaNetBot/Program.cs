@@ -14,7 +14,6 @@ public static class Program
         IHost host = Host.CreateDefaultBuilder()
             .ConfigureServices(ConfigureServices)
             .ConfigureAppConfiguration(ConfigureAppConfiguration)
-            .ConfigureLogging(ConfigureLogging)
             .Build();
 
         _ = host.StartAsync();
@@ -59,18 +58,13 @@ public static class Program
 
     }
 
-    public static void ConfigureLogging(ILoggingBuilder builder)
-    {
-        builder.AddConsole();
-    }
-
     public static void ConfigureServices(IServiceCollection services)
     {
         services.AddSingleton<CelesteNyaNetBot>();
 #if DEBUG
-        services.AddSingleton<ITokenService, TestTokenService>();
-#else
         services.AddSingleton<ITokenService, TokenService>();
+#else
+        services.AddSingleton<ITokenService, TestTokenService>();
 #endif
         services.AddSingleton<LoggerService>();
         services.AddSingleton<MemorySessionService>();
