@@ -35,10 +35,30 @@ public class CelesteNyaNetBot
         wsClient = new(configuration["Connection:WebSocketUri"]!, LogLevel.Trace);
         wsClient.OnLog += s => logger.LogInfo(NyaBot, s);
         wsClient.OnClientEventOccurred += WsClient_OnClientEventOccured;
+        wsClient.OnStoppedUnexpectedly += this.WsClient_OnStoppedUnexpectedly;
 
         eventPipeline = ConfigureEventPipeline(new());
         messagePipeline = ConfigureMessagePipeline(new());
         simCmd.AddModule(typeof(LoginModule));
+    }
+
+    private void WsClient_OnStoppedUnexpectedly(Exception obj)
+    {
+        Task.Run(async () =>
+        {
+            logger.LogError(NyaBot, obj, $"Client session stopped unexpectetedly! " +
+                $"Next connection try will be started in 2s.");
+            await Task.Delay(2000);
+            try
+            {
+                await wsClient.StartAsync();
+            }
+            catch (Exception e)
+            {
+                logger.LogError(NyaBot, e, "Error when trying to reconnect.");
+            }
+        });
+
     }
 
     public void WsClient_OnClientEventOccured(ClientEvent clientEvent)

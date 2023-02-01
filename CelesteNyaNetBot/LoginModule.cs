@@ -79,6 +79,7 @@ public class LoginModule : CommandModule
                 }
                 yield break;
             }
+            int timeout = int.Parse(serviceProvider.GetRequiredService<IConfiguration>()["Bot:BindTimeout"]!);
             if (!nameRegex.IsMatch(userName))
             {
                 Content.Message.Sender.SendMessageAsync(groupIdWay, "昵称不符合规则！只允许大小写字母和数字以及符号_和^和.的组合.");
@@ -87,7 +88,7 @@ public class LoginModule : CommandModule
             try
             {
                 Content.Message.Sender.SendMessageAsync(groupIdWay,
-                    $"你确定要将你的id绑定到用户名 `{userName}` 上吗, 使用!bind {userName} confirm确认该操作."
+                    $"你确定要将你的id绑定到用户名 \"{userName}\" 上吗, 使用!bind {userName} confirm确认该操作. 此操作将会在{timeout}秒后将失效"
                     );
             }
             //临时消息发送都会发生这个异常, 除了魔改或等go-cqhttp更新没办法
@@ -99,8 +100,7 @@ public class LoginModule : CommandModule
                 "bind",
                 new object[] { new string[] { userName, "confirm" } }
                 );
-            int time = int.Parse(serviceProvider.GetRequiredService<IConfiguration>()["Bot:BindTimeout"]!);
-            var tickWaiter = new TickWaiter(time);
+            var tickWaiter = new TickWaiter(timeout);
             EventWaiter resultWaiter = null!;
             yield return new OrEventWaiter(cmdWaiter, tickWaiter, w => resultWaiter = w);
             if (ReferenceEquals(resultWaiter, tickWaiter))
