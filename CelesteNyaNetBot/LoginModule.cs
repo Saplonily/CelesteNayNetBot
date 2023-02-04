@@ -88,26 +88,38 @@ public class LoginModule : CommandModule
             try
             {
                 Content.Message.Sender.SendMessageAsync(groupIdWay,
-                    $"你确定要将你的id绑定到用户名 \"{userName}\" 上吗, 使用!bind {userName} confirm确认该操作. 此操作将会在{timeout}秒后将失效"
+                    $"你确定要将你的id绑定到用户名 \"{userName}\" 上吗, " +
+                    $"使用!bind {userName} confirm确认该操作. " +
+                    $"此操作将会在{timeout}秒后将失效. " +
+                    $"使用!bind_cancel主动取消该操作."
                     );
             }
             //临时消息发送都会发生这个异常, 除了魔改或等go-cqhttp更新没办法
             catch (CqApiCallFailedException) { }
 
-            var cmdWaiter = new CommandWaiter(
+            var cmdConfirmWaiter = new CommandWaiter(
                 Content.SimCommandExecuter,
                 Content.Executor,
                 "bind",
                 new object[] { new string[] { userName, "confirm" } }
                 );
+            var cmdCancelWaiter = new CommandWaiter(
+                Content.SimCommandExecuter,
+                Content.Executor,
+                "bind_cancel"
+                );
             var tickWaiter = new TickWaiter(timeout);
             EventWaiter resultWaiter = null!;
-            yield return new OrEventWaiter(cmdWaiter, tickWaiter, w => resultWaiter = w);
-            if (ReferenceEquals(resultWaiter, tickWaiter))
+            yield return new OrEventWaiter(w => resultWaiter = w, cmdConfirmWaiter, cmdCancelWaiter, tickWaiter);
+            if (resultWaiter == tickWaiter)
             {
                 Content.Executor.SendMessageAsync(groupIdWay, "确认超时, 请再次使用!bind指令进行绑定");
             }
-            else if (ReferenceEquals(resultWaiter, cmdWaiter))
+            else if (resultWaiter == cmdCancelWaiter)
+            {
+                Content.Executor.SendMessageAsync(groupIdWay, "取消bind操作");
+            }
+            else if (resultWaiter == cmdConfirmWaiter)
             {
                 NayResponse? res = null; CreateAccountResponseData? data = null;
                 try
@@ -160,6 +172,9 @@ public class LoginModule : CommandModule
             }
         }
     }
+
+    [Command("bind_cancel")]
+    public void BindCancel() { }
 
     [Command("relogin")]
     public void Relogin()
