@@ -2,7 +2,7 @@
 
 namespace CelesteNyaNetBot.Response;
 
-public class NayResponse
+public class NyaResponse
 {
     [JsonPropertyName("code")]
     public int Code { get; set; }
@@ -11,5 +11,5 @@ public class NayResponse
     public string Message { get; set; } = null!;
 
     [JsonIgnore]
-    public NayResponseData? ResponseData { get; set; }
+    public NyaResponseData? ResponseData { get; set; }
 }

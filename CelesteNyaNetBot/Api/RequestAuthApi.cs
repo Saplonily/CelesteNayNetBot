@@ -3,7 +3,7 @@ using CelesteNyaNetBot.Response;
 
 namespace CelesteNyaNetBot.Api;
 
-public class RequestAuthApi : NayApi
+public class RequestAuthApi : NyaApi
 {
     [JsonIgnore]
     public override Uri Uri => new("/bot/requestAuth", UriKind.Relative);

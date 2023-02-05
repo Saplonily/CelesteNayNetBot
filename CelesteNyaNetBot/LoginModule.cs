@@ -19,18 +19,21 @@ public class LoginModule : CommandModule
     protected MemorySessionService memorySessionService;
     protected CoroutineService coroutineService;
     protected IServiceProvider serviceProvider;
+    protected LoggerService loggerService;
 
     public LoginModule(
         ITokenService tokenService,
         MemorySessionService memorySessionService,
         CoroutineService coroutineService,
-        IServiceProvider serviceProvider
+        IServiceProvider serviceProvider,
+        LoggerService loggerService
         )
     {
         this.tokenService = tokenService;
         this.memorySessionService = memorySessionService;
         this.coroutineService = coroutineService;
         this.serviceProvider = serviceProvider;
+        this.loggerService = loggerService;
     }
 
     [Command("bind")]
@@ -121,7 +124,7 @@ public class LoginModule : CommandModule
             }
             else if (resultWaiter == cmdConfirmWaiter)
             {
-                NayResponse? res = null; CreateAccountResponseData? data = null;
+                NyaResponse? res = null; CreateAccountResponseData? data = null;
                 try
                 {
                     (res, data) = tokenService.CreateAccountAsync(Content.Executor.UserId, userName).Result;
@@ -181,10 +184,20 @@ public class LoginModule : CommandModule
     {
         try
         {
-            var (res, data) = tokenService.RequestAuthAsync(Content.Executor.UserId).Result;
-            if (res is null)
+            NyaResponse? res = null; RequestAuthResponseData? data = null;
+            try
             {
-                Content.MessageWindow.SendTextMessageAsync("内部异常").ConfigureAwait(false);
+                (res, data) = tokenService.RequestAuthAsync(Content.Executor.UserId).Result;
+                if (res is null)
+                {
+                    Content.MessageWindow.SendTextMessageAsync("内部异常");
+                    return;
+                }
+            }
+            catch (Exception e)
+            {
+                Content.MessageWindow.SendTextMessageAsync("服务端异常");
+                loggerService.Logger.LogError(CelesteNyaNetBot.NyaBot, e, "Error when trying call modify_name api:");
                 return;
             }
             if (res.Code is 200)
@@ -200,10 +213,67 @@ public class LoginModule : CommandModule
             }
             else if (res.Code is 401 or 403 or 500)
             {
-                Content.MessageWindow.SendTextMessageAsync($"内部异常，消息为 {res.Code}:{res.Message}");
+                Content.MessageWindow.SendTextMessageAsync($"内部异常，消息为 {res.Code}, {res.Message}");
             }
         }
         //临时消息发送都会发生这个异常, 除了魔改或等go-cqhttp更新没办法
+        catch (CqApiCallFailedException) { }
+    }
+
+    [Command("change_name", true)]
+    public void ModifyName(string newName)
+    {
+        long? groupIdWay = null;
+        if (Content.Message is IGroupMessage groupMsg)
+        {
+            groupIdWay = groupMsg.Group.GroupId;
+        }
+        else if (Content.Message is IPrivateMessage privateMessage)
+        {
+            groupIdWay = privateMessage.TempSourceGroupId;
+        }
+        try
+        {
+            NyaResponse? res = null; ModifyNameResponseData? data = null;
+
+            if (!nameRegex.IsMatch(newName))
+            {
+                Content.Message.Sender.SendMessageAsync(groupIdWay, "昵称不符合规则！只允许大小写字母和数字以及符号_和^和.的组合.");
+                return;
+            }
+            try
+            {
+                (res, data) = tokenService.ModifyNameAsync(Content.ExecutorId, newName).GetResultOfAwaiter();
+                if (res is null)
+                {
+                    Content.MessageWindow.SendTextMessageAsync("内部异常");
+                    loggerService.Logger.LogError(CelesteNyaNetBot.NyaBot, "Error when trying call modify_name api, got null response entity.");
+                    return;
+                }
+                if (res.Code is 200 && data != null)
+                {
+                    if (data.Cooldown == null)
+                    {
+                        Content.Executor.SendMessageAsync(groupIdWay, $"您的名称已更改为 \"{newName}\".");
+                        if (Content.Message is IGroupMessage groupMsg2)
+                            groupMsg2.Sender.SetGroupCardAsync(newName);
+                    }
+                    else
+                    {
+                        Content.Executor.SendMessageAsync(groupIdWay, $"改名冷却中！ 剩余时间: {data.Cooldown}s");
+                    }
+                }
+                if (res.Code is 201)
+                {
+                    Content.Executor.SendMessageAsync(groupIdWay, $"您还暂时未绑定您的群服账号, 请先使用\"!bind 用户名\"指令绑定账号");
+                }
+            }
+            catch (Exception e)
+            {
+                Content.MessageWindow.SendTextMessageAsync("服务端异常");
+                loggerService.Logger.LogError(CelesteNyaNetBot.NyaBot, e, "Error when trying call modify_name api:");
+            }
+        }
         catch (CqApiCallFailedException) { }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace CelesteNyaNetBot.Response;
 
-public class GetUserNameResponseData : NayResponseData
+public class GetUserNameResponseData : NyaResponseData
 {
     [JsonPropertyName("uid")]
     public int Uid { get; set; }

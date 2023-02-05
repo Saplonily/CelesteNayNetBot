@@ -2,7 +2,7 @@
 
 namespace CelesteNyaNetBot.Response;
 
-public class RequestAuthResponseData : NayResponseData
+public class RequestAuthResponseData : NyaResponseData
 {
     [JsonPropertyName("token")]
     public string Token { get; set; } = null!;

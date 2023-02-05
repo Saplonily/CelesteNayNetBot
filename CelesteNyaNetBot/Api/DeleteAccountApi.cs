@@ -3,7 +3,7 @@ using CelesteNyaNetBot.Response;
 
 namespace CelesteNyaNetBot.Api;
 
-public class DeleteAccountApi : NayApi
+public class DeleteAccountApi : NyaApi
 {
     [JsonIgnore]
     public override Uri Uri => new("bot/deleteAccount", UriKind.Relative);

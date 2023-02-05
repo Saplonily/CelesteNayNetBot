@@ -47,15 +47,17 @@ public class CelesteNyaNetBot
         Task.Run(async () =>
         {
             logger.LogError(NyaBot, obj, $"Client session stopped unexpectetedly! " +
-                $"Next connection try will be started in 2s.");
-            await Task.Delay(2000);
+                $"Next connection try will be started in 4s.");
+            tryReConnect:
+            await Task.Delay(4000).ConfigureAwait(false);
             try
             {
-                await wsClient.StartAsync();
+                await wsClient.StartAsync().ConfigureAwait(false);
             }
             catch (Exception e)
             {
-                logger.LogError(NyaBot, e, "Error when trying to reconnect.");
+                logger.LogError(NyaBot, e, prefix: "Error when trying to reconnect.", suffix: "Next connection retry will be started in 4s.");
+                goto tryReConnect;
             }
         });
 

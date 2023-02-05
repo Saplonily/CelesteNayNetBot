@@ -2,8 +2,8 @@
 
 namespace CelesteNyaNetBot.Response;
 
-public abstract class NayResponseData
+public abstract class NyaResponseData
 {
     [JsonIgnore]
-    public NayResponse Response { get; set; } = null!;
+    public NyaResponse Response { get; set; } = null!;
 }

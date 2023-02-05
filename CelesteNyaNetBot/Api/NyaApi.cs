@@ -2,7 +2,7 @@
 
 namespace CelesteNyaNetBot.Api;
 
-public abstract class NayApi
+public abstract class NyaApi
 {
     [JsonIgnore]
     public abstract Uri Uri { get; }
@@ -13,7 +13,7 @@ public abstract class NayApi
     [JsonIgnore]
     public abstract Type ResponseType { get; }
 
-    protected NayApi(string session)
+    protected NyaApi(string session)
     {
         Session = session;
     }

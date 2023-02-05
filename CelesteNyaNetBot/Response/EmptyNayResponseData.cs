@@ -1,5 +1,5 @@
 ﻿namespace CelesteNyaNetBot.Response;
 
-public class EmptyNayResponseData : NayResponseData
+public class EmptyNayResponseData : NyaResponseData
 {
 }

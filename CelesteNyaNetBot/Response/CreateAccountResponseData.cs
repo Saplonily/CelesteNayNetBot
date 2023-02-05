@@ -2,7 +2,7 @@
 
 namespace CelesteNyaNetBot.Response;
 
-public class CreateAccountResponseData : NayResponseData
+public class CreateAccountResponseData : NyaResponseData
 {
     [JsonPropertyName("bind_number")]
     public string BindNumber { get; set; } = null!;

@@ -3,7 +3,7 @@ using CelesteNyaNetBot.Response;
 
 namespace CelesteNyaNetBot.Api;
 
-public class GetUserNameApi : NayApi
+public class GetUserNameApi : NyaApi
 {
     [JsonIgnore]
     public override Type ResponseType => typeof(GetUserNameResponseData);
