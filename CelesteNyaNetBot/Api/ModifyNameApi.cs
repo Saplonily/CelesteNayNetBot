@@ -17,10 +17,10 @@ public class ModifyNameApi : NyaApi
     [JsonPropertyName("username")]
     public string NewUserName { get; }
 
-    public ModifyNameApi(string session, long qqNumber, string newUserName)
+    public ModifyNameApi(string session, string qqNumber, string newUserName)
         : base(session)
     {
-        QQNumber = qqNumber.ToString();
+        QQNumber = qqNumber;
         NewUserName = newUserName;
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using CelesteNyaNetBot.Response;
 using Microsoft.Extensions.Configuration;
@@ -236,7 +237,7 @@ public class LoginModule : CommandModule
                 }
                 else
                 {
-                    Content.Executor.SendMessageAsync(groupIdWay, 
+                    Content.Executor.SendMessageAsync(groupIdWay,
                         $"改名冷却中！ 剩余时间: {TimeSpan.FromSeconds(data.Cooldown.Value):d\\d\\ hh\\h\\:mm\\m\\:ss\\s}");
                 }
             }
@@ -250,6 +251,161 @@ public class LoginModule : CommandModule
             }
         }
         catch (CqApiCallFailedException) { }
+    }
+
+    [Command("change_prefix")]
+    public void ModifyPrefix(string prefix)
+    {
+        var res = tokenService.ModifyPrefixAsync(Content.ExecutorId, prefix).GetResultOfAwaiter();
+        if (res is null)
+        {
+            Content.MessageWindow.SendMessageAsync("内部异常");
+            return;
+        }
+        if (res.Code == 200)
+        {
+            Content.MessageWindow.SendMessageAsync($"你的头衔已更换至 \"{prefix}\".");
+        }
+        else if (res.Code == 201)
+        {
+            if (res.Message.Contains("prefix not"))
+            {
+                Content.MessageWindow.SendMessageAsync($"你并没有这个 \"{prefix}\" 头衔哦, 请检查拼写是否正确.");
+            }
+            else if (res.Message.Contains("user not"))
+            {
+                Content.MessageWindow.SendMessageAsync($"用户还未注册! 请使用\"!bind 用户名\"指令进行注册.");
+            }
+        }
+    }
+
+    [Command("change_prefix")]
+    public void ModifyPrefix()
+    {
+        var res = tokenService.ModifyPrefixAsync(Content.ExecutorId, null).GetResultOfAwaiter();
+        if (res is null)
+        {
+            Content.MessageWindow.SendTextMessageAsync("内部异常");
+            return;
+        }
+        if (res.Code == 200)
+        {
+            Content.MessageWindow.SendTextMessageAsync($"你的头衔已更换至默认头衔(无头衔)");
+        }
+        else if (res.Code == 201)
+        {
+            if (res.Message.Contains("user not"))
+            {
+                Content.MessageWindow.SendMessageAsync($"用户还未注册! 请使用\"!bind 用户名\"指令进行注册.");
+            }
+        }
+    }
+
+    [Command("get_prefixs")]
+    public void GetPrefixs()
+    {
+        var (res, data) = tokenService.GetPrefixsAsync(Content.ExecutorId).GetResultOfAwaiter();
+        if (res is null || data is null) return;
+        if (res.Code == 201)
+        {
+            if (res.Message.Contains("user not"))
+            {
+                Content.MessageWindow.SendMessageAsync($"用户还未注册! 请使用\"!bind 用户名\"指令进行注册.");
+            }
+        }
+        else if (res.Code == 200)
+        {
+            if (data.Prefixs.Count == 0)
+            {
+                Content.MessageWindow.SendTextMessageAsync("你还暂未拥有任何头衔呢...");
+                return;
+            }
+            string resultString = "你目前拥有头衔:\n"
+                + string.Join('\n', data.Prefixs.Select(o => o.Prefix));
+            Content.MessageWindow.SendTextMessageAsync(resultString);
+        }
+    }
+
+    [Command("get_colors")]
+    public List<GetColorsResponseData.ColorObject>? GetColors()
+    {
+        var (res, data) = tokenService.GetColorsAsync(Content.ExecutorId).GetResultOfAwaiter();
+        if (res is null || data is null) return null;
+        if (res.Code == 201)
+        {
+            if (res.Message.Contains("user not"))
+            {
+                Content.MessageWindow.SendMessageAsync($"用户还未注册! 请使用\"!bind 用户名\"指令进行注册.");
+            }
+        }
+        else if (res.Code == 200)
+        {
+            if (data.Colors.Count == 0)
+            {
+                Content.MessageWindow.SendTextMessageAsync("你还暂未拥有任何昵称颜色呢...");
+                return null;
+            }
+            StringBuilder sb = new("你目前拥有的颜色:\n");
+            for (int i = 0; i < data.Colors.Count; i++)
+            {
+                sb.AppendFormat("#{0} - {1}", i + 1, data.Colors[i]);
+                if (i != data.Colors.Count - 1)
+                {
+                    sb.AppendLine();
+                }
+            }
+            Content.MessageWindow.SendTextMessageAsync(sb.ToString());
+            return data.Colors;
+        }
+        return null;
+    }
+
+    [Command("change_color")]
+    public void ModifyColor(string color)
+    {
+        var res = tokenService.ModifyColorAsync(Content.ExecutorId, color).GetResultOfAwaiter();
+        if (res is null)
+        {
+            Content.MessageWindow.SendMessageAsync("内部异常");
+            return;
+        }
+        if (res.Code == 200)
+        {
+            Content.MessageWindow.SendMessageAsync($"你的昵称颜色已更换至 \"{color}\".");
+        }
+        else if (res.Code == 201)
+        {
+            if (res.Message.Contains("color not"))
+            {
+                Content.MessageWindow.SendMessageAsync($"你并没有这个 \"{color}\" 颜色哦, 请检查拼写是否正确或者使用\"!get_colors\"指令查询所有可用颜色.");
+            }
+            else if (res.Message.Contains("user not"))
+            {
+                Content.MessageWindow.SendMessageAsync($"用户还未注册! 请使用\"!bind 用户名\"指令进行注册.");
+            }
+        }
+    }
+
+    [Command("change_color")]
+    public void ModifyColor()
+    {
+        var res = tokenService.ModifyColorAsync(Content.ExecutorId, null).GetResultOfAwaiter();
+        if (res is null)
+        {
+            Content.MessageWindow.SendTextMessageAsync("内部异常");
+            return;
+        }
+        if (res.Code == 200)
+        {
+            Content.MessageWindow.SendTextMessageAsync($"你的昵称颜色已更换至默认颜色(#FFFFFF)");
+        }
+        else if (res.Code == 201)
+        {
+            if (res.Message.Contains("user not"))
+            {
+                Content.MessageWindow.SendMessageAsync($"用户还未注册! 请使用\"!bind 用户名\"指令进行注册.");
+            }
+        }
     }
 }
 

@@ -9,4 +9,8 @@ public interface ITokenService
     Task<(NyaResponse?, GetUserNameResponseData?)> GetUserNameAsync(long userId);
     Task<(NyaResponse?, RequestAuthResponseData?)> RequestAuthAsync(long userId);
     Task<(NyaResponse?, ModifyNameResponseData?)> ModifyNameAsync(long userId, string newName);
+    Task<NyaResponse?> ModifyPrefixAsync(long userId, string? prefix);
+    Task<(NyaResponse?, GetPrefixsResponseData?)> GetPrefixsAsync(long userId);
+    Task<(NyaResponse?, GetColorsResponseData?)> GetColorsAsync(long userId);
+    Task<NyaResponse?> ModifyColorAsync(long userId, string? color);
 }

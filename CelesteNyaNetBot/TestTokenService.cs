@@ -51,4 +51,44 @@ public class TestTokenService : ITokenService
         var res = new NyaResponse() { ResponseData = data, Code = 200 };
         return Task.FromResult((res, data))!;
     }
+
+    public Task<NyaResponse?> ModifyPrefixAsync(long userId, string? prefix)
+    {
+        var res = new NyaResponse() { Code = 200, Message = "user not" };
+        return Task.FromResult(res)!;
+    }
+
+    public Task<(NyaResponse?, GetPrefixsResponseData?)> GetPrefixsAsync(long userId)
+    {
+        GetPrefixsResponseData data = new()
+        {
+            Prefixs = new()
+            {
+                new("celeste-5"),
+                new("o2")
+            }
+        };
+        var res = new NyaResponse() { ResponseData = data, Code = 200 };
+        return Task.FromResult((res, data))!;
+    }
+
+    public Task<(NyaResponse?, GetColorsResponseData?)> GetColorsAsync(long userId)
+    {
+        GetColorsResponseData data = new()
+        {
+            Colors = new()
+            {
+                new("#114514"),
+                new("#223366")
+            }
+        };
+        var res = new NyaResponse() { ResponseData = data, Code = 200 };
+        return Task.FromResult((res, data))!;
+    }
+
+    public Task<NyaResponse?> ModifyColorAsync(long userId, string? color)
+    {
+        var res = new NyaResponse() { Code = 201, Message = "color not" };
+        return Task.FromResult(res)!;
+    }
 }

@@ -62,7 +62,7 @@ public static class Program
     {
         services.AddSingleton<CelesteNyaNetBot>();
 #if DEBUG
-        services.AddSingleton<ITokenService, TestTokenService>();
+        services.AddSingleton<ITokenService, TokenService>();
 #else
         services.AddSingleton<ITokenService, TokenService>();
 #endif
