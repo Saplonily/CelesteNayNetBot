@@ -39,7 +39,6 @@ public class CelesteNyaNetBot
 
         eventPipeline = ConfigureEventPipeline(new());
         messagePipeline = ConfigureMessagePipeline(new());
-        simCmd.AddModule(typeof(LoginModule));
     }
 
     private void WsClient_OnStoppedUnexpectedly(Exception obj)
