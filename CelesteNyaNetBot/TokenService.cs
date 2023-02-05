@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Net;
+using System.Text;
 using System.Text.Json;
 using CelesteNyaNetBot.Api;
 using CelesteNyaNetBot.Response;
@@ -33,6 +34,7 @@ public class TokenService : ITokenService
 
     public Task<(NyaResponse?, ModifyNameResponseData?)> ModifyNameAsync(long userId, string newName)
         => PackedCallApiAsync<ModifyNameResponseData>(new ModifyNameApi(session, userId, newName));
+
     public async Task<NyaResponse?> DeleteAccountAsync(long userId)
         => (await PackedCallApiAsync<EmptyNayResponseData>(new DeleteAccountApi(session, userId.ToString())).ConfigureAwait(false)).Item1;
 
@@ -48,7 +50,16 @@ public class TokenService : ITokenService
     {
         string json = JsonSerializer.Serialize(api, api.GetType());
         HttpContent content = new StringContent(json, Encoding.UTF8, "application/json");
-        var response = await httpClient.PostAsync(uri, content);
+        HttpResponseMessage? response = null;
+        try
+        {
+            response = await httpClient.PostAsync(uri, content);
+        }
+        catch(Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
         response.EnsureSuccessStatusCode();
         StreamReader reader = new(response.Content.ReadAsStream());
         string resultString = reader.ReadToEnd();

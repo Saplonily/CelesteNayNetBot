@@ -35,7 +35,7 @@ public class CelesteNyaNetBot
         wsClient = new(configuration["Connection:WebSocketUri"]!, LogLevel.Trace);
         wsClient.OnLog += s => logger.LogInfo(NyaBot, s);
         wsClient.OnClientEventOccurred += WsClient_OnClientEventOccured;
-        wsClient.OnStoppedUnexpectedly += this.WsClient_OnStoppedUnexpectedly;
+        wsClient.OnStoppedUnexpectedly += WsClient_OnStoppedUnexpectedly;
 
         eventPipeline = ConfigureEventPipeline(new());
         messagePipeline = ConfigureMessagePipeline(new());

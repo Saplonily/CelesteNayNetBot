@@ -46,7 +46,7 @@ public class TestTokenService : ITokenService
     {
         ModifyNameResponseData data = new()
         {
-            Cooldown = null
+            Cooldown = 2417479
         };
         var res = new NyaResponse() { ResponseData = data, Code = 200 };
         return Task.FromResult((res, data))!;

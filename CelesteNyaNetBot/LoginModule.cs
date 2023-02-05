@@ -124,28 +124,20 @@ public class LoginModule : CommandModule
             }
             else if (resultWaiter == cmdConfirmWaiter)
             {
-                NyaResponse? res = null; CreateAccountResponseData? data = null;
-                try
+                var (res, data) = tokenService.CreateAccountAsync(Content.Executor.UserId, userName).Result;
+                if (res is null)
                 {
-                    (res, data) = tokenService.CreateAccountAsync(Content.Executor.UserId, userName).Result;
-                }
-                catch (Exception)
-                {
-                    Content.Message.MessageWindow.SendTextMessageAsync("服务端异常");
+                    Content.Message.Sender.SendMessageAsync(groupIdWay, "内部异常");
                     yield break;
                 }
                 try
                 {
-                    if (res is null)
-                    {
-                        Content.Message.Sender.SendMessageAsync(groupIdWay, "内部异常");
-                        yield break;
-                    }
                     if (res.Code is 200)
                     {
                         string finalUrl = string.Format(ResultHttpUrlFormat, data!.Token);
                         if (groupIdWay is not null)
                             Content.Client.SetGroupCardAsync(groupIdWay.Value, Content.Executor.UserId, userName);
+
                         Content.Message.Sender.SendTextMessageAsync(
                             $"您已经成功绑定至群服,请遵守服务器游玩规则\r\n" +
                             $"客户端MOD下载:https://celeste.weg.fan/api/v2/download/mods/Miao.CelesteNet.Client\r\n" +
@@ -157,15 +149,13 @@ public class LoginModule : CommandModule
                             $"注意 如果更换电脑或客户端请使用指令 !relogin重新登陆"
                             );
                         if (Content.Message is IGroupMessage groupMessage)
-                        {
                             groupMessage.Sender.SetGroupCardAsync(userName);
-                        }
                     }
                     else if (res.Code is 201)
                     {
                         Content.Message.Sender.SendMessageAsync(groupIdWay, $"绑定失败, 已经存在绑定的账号。如需重新登陆请使用 !relogin");
                     }
-                    else if (res.Code is 401 or 403 or 500)
+                    else
                     {
                         Content.Message.Sender.SendMessageAsync(groupIdWay, $"内部异常，消息为 {res.Code}:{res.Message}");
                     }
@@ -182,24 +172,14 @@ public class LoginModule : CommandModule
     [Command("relogin")]
     public void Relogin()
     {
+        var (res, data) = tokenService.RequestAuthAsync(Content.ExecutorId).Result;
+        if (res is null)
+        {
+            Content.MessageWindow.SendTextMessageAsync("内部异常");
+            return;
+        }
         try
         {
-            NyaResponse? res = null; RequestAuthResponseData? data = null;
-            try
-            {
-                (res, data) = tokenService.RequestAuthAsync(Content.Executor.UserId).Result;
-                if (res is null)
-                {
-                    Content.MessageWindow.SendTextMessageAsync("内部异常");
-                    return;
-                }
-            }
-            catch (Exception e)
-            {
-                Content.MessageWindow.SendTextMessageAsync("服务端异常");
-                loggerService.Logger.LogError(CelesteNyaNetBot.NyaBot, e, "Error when trying call modify_name api:");
-                return;
-            }
             if (res.Code is 200)
             {
                 string finalUrl = string.Format(ResultHttpUrlFormat, data!.Token);
@@ -211,7 +191,7 @@ public class LoginModule : CommandModule
             {
                 Content.MessageWindow.SendTextMessageAsync($"生成失败，不存在已绑定的账号，请使用!bind 用户名进行绑定。");
             }
-            else if (res.Code is 401 or 403 or 500)
+            else
             {
                 Content.MessageWindow.SendTextMessageAsync($"内部异常，消息为 {res.Code}, {res.Message}");
             }
@@ -232,46 +212,41 @@ public class LoginModule : CommandModule
         {
             groupIdWay = privateMessage.TempSourceGroupId;
         }
+        if (!nameRegex.IsMatch(newName))
+        {
+            Content.Message.Sender.SendMessageAsync(groupIdWay, "昵称不符合规则！只允许大小写字母和数字以及符号_和^和.的组合.");
+            return;
+        }
+        var (res, data) = tokenService.ModifyNameAsync(Content.ExecutorId, newName).GetResultOfAwaiter();
+        if (res is null || data is null)
+        {
+            Content.MessageWindow.SendTextMessageAsync("内部异常");
+            loggerService.Logger.LogError(CelesteNyaNetBot.NyaBot, "Error when trying call modify_name api, got null response entity.");
+            return;
+        }
         try
         {
-            NyaResponse? res = null; ModifyNameResponseData? data = null;
-
-            if (!nameRegex.IsMatch(newName))
+            if (res.Code is 200)
             {
-                Content.Message.Sender.SendMessageAsync(groupIdWay, "昵称不符合规则！只允许大小写字母和数字以及符号_和^和.的组合.");
-                return;
-            }
-            try
-            {
-                (res, data) = tokenService.ModifyNameAsync(Content.ExecutorId, newName).GetResultOfAwaiter();
-                if (res is null)
+                if (data.Cooldown == null)
                 {
-                    Content.MessageWindow.SendTextMessageAsync("内部异常");
-                    loggerService.Logger.LogError(CelesteNyaNetBot.NyaBot, "Error when trying call modify_name api, got null response entity.");
-                    return;
+                    Content.Executor.SendMessageAsync(groupIdWay, $"您的名称已更改为 \"{newName}\".");
+                    if (Content.Message is IGroupMessage groupMsg2)
+                        groupMsg2.Sender.SetGroupCardAsync(newName);
                 }
-                if (res.Code is 200 && data != null)
+                else
                 {
-                    if (data.Cooldown == null)
-                    {
-                        Content.Executor.SendMessageAsync(groupIdWay, $"您的名称已更改为 \"{newName}\".");
-                        if (Content.Message is IGroupMessage groupMsg2)
-                            groupMsg2.Sender.SetGroupCardAsync(newName);
-                    }
-                    else
-                    {
-                        Content.Executor.SendMessageAsync(groupIdWay, $"改名冷却中！ 剩余时间: {data.Cooldown}s");
-                    }
-                }
-                if (res.Code is 201)
-                {
-                    Content.Executor.SendMessageAsync(groupIdWay, $"您还暂时未绑定您的群服账号, 请先使用\"!bind 用户名\"指令绑定账号");
+                    Content.Executor.SendMessageAsync(groupIdWay, 
+                        $"改名冷却中！ 剩余时间: {TimeSpan.FromSeconds(data.Cooldown.Value):d\\d\\ hh\\h\\:mm\\m\\:ss\\s}");
                 }
             }
-            catch (Exception e)
+            else if (res.Code is 201)
             {
-                Content.MessageWindow.SendTextMessageAsync("服务端异常");
-                loggerService.Logger.LogError(CelesteNyaNetBot.NyaBot, e, "Error when trying call modify_name api:");
+                Content.Executor.SendMessageAsync(groupIdWay, $"您还暂时未绑定您的群服账号, 请先使用\"!bind 用户名\"指令绑定账号");
+            }
+            else
+            {
+                Content.MessageWindow.SendTextMessageAsync($"内部异常，消息为 {res.Code}, {res.Message}");
             }
         }
         catch (CqApiCallFailedException) { }
