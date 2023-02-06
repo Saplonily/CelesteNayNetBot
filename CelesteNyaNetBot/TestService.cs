@@ -2,7 +2,7 @@
 
 namespace CelesteNyaNetBot;
 
-public class TestTokenService : ITokenService
+public class TestService : INyaService
 {
     public Task<(NyaResponse?, CreateAccountResponseData?)> CreateAccountAsync(long userId, string userName)
     {

@@ -2,7 +2,7 @@
 
 namespace CelesteNyaNetBot;
 
-public interface ITokenService
+public interface INyaService
 {
     Task<(NyaResponse?, CreateAccountResponseData?)> CreateAccountAsync(long userId, string userName);
     Task<NyaResponse?> DeleteAccountAsync(long userId);

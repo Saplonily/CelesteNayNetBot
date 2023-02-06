@@ -18,12 +18,12 @@ public class CelesteNyaNetBot
     protected Pipeline<IMessage> messagePipeline;
 
     protected IServiceProvider serviceProvider;
-    protected ITokenService tokenService;
+    protected INyaService tokenService;
     protected MemorySessionService memorySessionService;
     protected CoroutineService coroutineService;
     protected SimCommandExecuter simCmd;
 
-    public CelesteNyaNetBot(IConfiguration configuration, ITokenService tokenService, IServiceProvider serviceProvider)
+    public CelesteNyaNetBot(IConfiguration configuration, INyaService tokenService, IServiceProvider serviceProvider)
     {
         logger = serviceProvider.GetRequiredService<LoggerService>().Logger;
         coroutineService = serviceProvider.GetRequiredService<CoroutineService>();

@@ -1,8 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Saladim.SalLogger;
 using SaladimQBot.Extensions;
 
 namespace CelesteNyaNetBot;
@@ -62,9 +60,9 @@ public static class Program
     {
         services.AddSingleton<CelesteNyaNetBot>();
 #if DEBUG
-        services.AddSingleton<ITokenService, TokenService>();
+        services.AddSingleton<INyaService, NyaService>();
 #else
-        services.AddSingleton<ITokenService, TokenService>();
+        services.AddSingleton<INyaService, NyaService>();
 #endif
         services.AddSingleton<LoggerService>();
         services.AddSingleton<MemorySessionService>();

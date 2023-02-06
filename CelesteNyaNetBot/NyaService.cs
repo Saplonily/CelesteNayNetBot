@@ -7,7 +7,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace CelesteNyaNetBot;
 
-public class TokenService : ITokenService
+public class NyaService : INyaService
 {
     protected string session;
 
@@ -16,7 +16,7 @@ public class TokenService : ITokenService
 
     protected HttpClient httpClient;
 
-    public TokenService(IConfiguration configuration)
+    public NyaService(IConfiguration configuration)
     {
         BaseUri = new Uri(configuration["TokenService:BaseUrl"]!);
         session = configuration["TokenService:Session"]!;
