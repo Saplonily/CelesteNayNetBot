@@ -1,6 +1,6 @@
 {
   "Bot": {
-    "CommandPrefix": "!",
+    "CommandPrefixes": "! ！",
     "BindTimeout": 120
   },
   "Logging": {

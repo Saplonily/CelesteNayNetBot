@@ -69,8 +69,8 @@ public static class Program
 
         services.AddSingleton<CoroutineService>();
         services.AddSimCommand(
-            s => new(s.GetRequiredService<IConfiguration>()["Bot:CommandPrefix"]!, t => (CommandModule)s.GetRequiredService(t)
-            ), typeof(Program).Assembly
+            s => new(t => (CommandModule)s.GetRequiredService(t), s.GetRequiredService<IConfiguration>()["Bot:CommandPrefixes"]!.Split(' ')),
+                typeof(Program).Assembly
             );
     }
 

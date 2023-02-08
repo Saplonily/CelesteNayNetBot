@@ -4,7 +4,8 @@
     //"BaseUrl": null
   },
   "Connection": {
-    "WebSocketUri": "ws://127.0.0.1:5000"
+    "WebSocketUri": "ws://127.0.0.1:5000",
+    "Key": "d7ffb205-632d-4e9c-8922-236ea7a3d08c"
   },
   "Logging": {
     "LogFileName": "D:\\文档\\temp\\test.log"

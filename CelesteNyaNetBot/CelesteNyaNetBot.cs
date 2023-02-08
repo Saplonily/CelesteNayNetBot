@@ -28,11 +28,11 @@ public class CelesteNyaNetBot
         logger = serviceProvider.GetRequiredService<LoggerService>().Logger;
         coroutineService = serviceProvider.GetRequiredService<CoroutineService>();
         memorySessionService = serviceProvider.GetRequiredService<MemorySessionService>();
-        simCmd = serviceProvider.GetRequiredService<SimCommandService>().Executor;
+        simCmd = serviceProvider.GetRequiredService<SimCommandService>().Executer;
         this.tokenService = tokenService;
         this.serviceProvider = serviceProvider;
 
-        wsClient = new(configuration["Connection:WebSocketUri"]!, LogLevel.Trace);
+        wsClient = new(configuration["Connection:WebSocketUri"]!, LogLevel.Trace, authorization: configuration["Connection:Key"]);
         wsClient.OnLog += s => logger.LogInfo(NyaBot, s);
         wsClient.OnClientEventOccurred += WsClient_OnClientEventOccured;
         wsClient.OnStoppedUnexpectedly += WsClient_OnStoppedUnexpectedly;

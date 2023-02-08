@@ -30,4 +30,25 @@ public static class TipStrings
     public const string TipColorChanged = "你的昵称颜色已更换至 \"{0}\".";
     public const string TipNotOwnedColor = "你并没有这个 \"{0}\" 颜色哦, 请检查拼写是否正确或者使用\"!get_colors\"指令查询所有可用颜色.";
     public const string TipColorIndexOutOfRange = "编号超出范围了! 请检查编号是否在\"!get_colors\"列表中.";
+
+    public const string TipHelp = """
+        --蔚蓝喵服群bot使用说明--
+        1. 登录模块
+          - !bind <用户名> 将你的qq账号绑定至<用户名>上
+          - !bind <用户名> confirm 确认上面指令的执行
+          - !relogin 重新获取登录凭证并过期之前的凭证
+          - !change_name <用户名> 更改你的名字, 冷却时间28天
+
+        2. 头衔、颜色更改模块
+          - !get_colors 获取拥有的所有颜色
+          - !change_color <颜色编号或者颜色hex> 将昵称颜色更改至目标颜色
+          - !get_prefixes 获取拥有的所有头衔
+          - !change_prefix <头衔> 更换为目标头衔
+
+        3. FAQ
+          Q: 注册的具体流程
+          A: 请参阅置顶群公告
+          Q: 我更换设备了或遗失了凭证后登录不上群服
+          A: 可使用!relogin指令重新获取新的链接并过期旧链接
+        """;
 }
