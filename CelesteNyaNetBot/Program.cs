@@ -60,7 +60,7 @@ public static class Program
     {
         services.AddSingleton<CelesteNyaNetBot>();
 #if DEBUG
-        services.AddSingleton<INyaService, NyaService>();
+        services.AddSingleton<INyaService, TestService>();
 #else
         services.AddSingleton<INyaService, NyaService>();
 #endif

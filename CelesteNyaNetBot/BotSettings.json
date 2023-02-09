@@ -1,7 +1,11 @@
 {
   "Bot": {
     "CommandPrefixes": "! ！",
-    "BindTimeout": 120
+    "BindTimeout": 120,
+    "OpCmdWhitelist": [
+      1773805744,
+      2748166392
+    ]
   },
   "Logging": {
     "LogLevel": {

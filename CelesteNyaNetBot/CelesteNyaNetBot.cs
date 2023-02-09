@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Text.Json.Nodes;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Saladim.SalLogger;
@@ -136,6 +137,22 @@ public class CelesteNyaNetBot
         {
             coroutineService.PushCoroutines(e);
             await next().ConfigureAwait(false);
+        });
+        //群成员入群时发送公告
+        pipeline.AppendMiddleware(async (e, next) =>
+        {
+            if (e is IClientGroupMemberIncreasedEvent ev && ev.Group.GroupId is 565265554
+#if DEBUG
+                or 860355679
+#endif
+            )
+            {
+                JsonObject? jo = JsonNode.Parse(File.ReadAllText("Saves.json")) as JsonObject;
+                if (jo is not null)
+                {
+                    await ev.Group.SendTextMessageAsync(jo["announce"]!.ToString()).ConfigureAwait(false);
+                }
+            }
         });
         return pipeline;
     }
