@@ -3,14 +3,22 @@ using System.Text;
 using SaladimQBot.Extensions;
 using SaladimQBot.GoCqHttp;
 using SaladimQBot.Shared;
+using Microsoft.Extensions.DependencyInjection;
+using CelesteNyaNetBot.Services;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace CelesteNyaNetBot.CommandModules;
 
 public class SwitchModule : CommandModule
 {
     protected INyaService nyaService;
+    protected IServiceProvider service;
 
-    public SwitchModule(INyaService nyaService) => this.nyaService = nyaService;
+    public SwitchModule(INyaService nyaService, IServiceProvider service)
+    {
+        this.nyaService = nyaService;
+        this.service = service;
+    }
 
     [Command("change_name", true)]
     public void ModifyName(string newName)
@@ -157,13 +165,31 @@ TipStrings.TipNameChangeCooldowning,
             }
             else
             {
-                StringBuilder sb = new(TipStrings.TipColorListingHead);
-                for (int i = 0; i < data.Colors.Count; i++)
+                var (ures, udata) = nyaService.GetUserNameAsync(Content.ExecutorId).GetResultOfAwaiter();
+                if (ures is null || udata is null) return;
+                if (ures.Code == 200)
                 {
-                    sb.AppendFormat(TipStrings.TipColorListingFormat, i + 1, data.Colors[i].Color);
+                    string prefixAndName = $"[{udata.Prefix}] - {udata.UserName}";
+                    var ds = service.GetRequiredService<DrawingService>();
+
+                    // linq不支持span, 别问为什么不用span
+                    var colors = data.Colors
+                        .Select(o => o.Color[1..])
+                        .Select(s => new SixLabors.ImageSharp.Color(new Rgba32(
+                            byte.Parse(s[0..2], System.Globalization.NumberStyles.HexNumber),
+                            byte.Parse(s[2..4], System.Globalization.NumberStyles.HexNumber),
+                            byte.Parse(s[4..6], System.Globalization.NumberStyles.HexNumber)
+                            )));
+                    Uri fUri = new(ds.Draw(prefixAndName, colors.ToArray()));
+                    IMessageEntityBuilder b = Content.Client.CreateMessageBuilder();
+                    b.WithImage(fUri);
+                    b.WithText($"\n{TipStrings.TipColorListingTail}");
+                    Content.MessageWindow.SendMessageAsync(b.Build());
                 }
-                sb.Append(TipStrings.TipColorListingTail);
-                Content.MessageWindow.SendTextMessageAsync(sb.ToString());
+                else
+                {
+                    Content.MessageWindow.SendTextMessageAsync(string.Format(TipStrings.TipInternalErrorWithCode, ures.Code, ures.Message));
+                }
             }
         }
     }

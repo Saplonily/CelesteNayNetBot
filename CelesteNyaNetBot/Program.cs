@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using CelesteNyaNetBot.Services;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SaladimQBot.Extensions;
@@ -60,7 +61,7 @@ public static class Program
     {
         services.AddSingleton<CelesteNyaNetBot>();
 #if DEBUG
-        services.AddSingleton<INyaService, TestService>();
+        services.AddSingleton<INyaService, NyaService>();
 #else
         services.AddSingleton<INyaService, NyaService>();
 #endif
@@ -72,6 +73,7 @@ public static class Program
             s => new(t => (CommandModule)s.GetRequiredService(t), s.GetRequiredService<IConfiguration>()["Bot:CommandPrefixes"]!.Split(' ')),
                 typeof(Program).Assembly
             );
+        services.AddSingleton<DrawingService>();
     }
 
     public static void ConfigureAppConfiguration(IConfigurationBuilder configuration)

@@ -10,8 +10,9 @@
 
 	<ItemGroup>
 	  <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.0" />
-	  <PackageReference Include="SaladimQBot.Extensions" Version="0.5.2" />
-	  <PackageReference Include="SaladimQBot.GoCqHttp" Version="0.5.1" />
+	  <PackageReference Include="SaladimQBot.Extensions" Version="0.5.4" />
+	  <PackageReference Include="SaladimQBot.GoCqHttp" Version="0.5.2" />
+	  <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta15" />
 	</ItemGroup>
 
 	<ItemGroup>
